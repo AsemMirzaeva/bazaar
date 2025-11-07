@@ -27,7 +27,7 @@ To get started with the API, follow these steps:
 ### Clone the Repository:
 
 ```bash
-git clone <git@github.com:yourusername/bazaar.git>
+git clone <git@github.com:AsemMirzaeva/bazaar.git>
 ```
 
 ### Navigate to the Project Directory:
