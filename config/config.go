@@ -1,0 +1,57 @@
+package config
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/caarlos0/env/v11"
+)
+
+type Env string
+
+const (
+	Env_Test Env = "test"
+	Env_Dev  Env = "dev"
+)
+
+type Config struct {
+	ApiServerPort    string `env:"APISERVER_PORT"`
+	ApiServerHost    string `env:"APISERVER_HOST"`
+	DatabaseName     string `env:"DB_NAME"`
+	DatabaseHost     string `env:"DB_HOST"`
+	DatabasePort     string `env:"DB_PORT"`
+	DatabasePortTest string `env:"DB_PORT_TEST"`
+	DatabaseUser     string `env:"DB_USER"`
+	DatabasePassword string `env:"DB_PASSWORD"`
+	Env              Env    `env:"ENV" envDefault:"dev"`
+	JwtSecret        string `env:"JWT_SECRET"`
+	ProjectRoot      string `env:"PROJECT_ROOT"`
+}
+
+func (c *Config) DatabaseUrl() string {
+	dbUrl := os.Getenv("DATABASE_URL")
+	if dbUrl != "" {
+		return dbUrl
+	}
+
+	port := c.DatabasePort
+	if c.Env == Env_Test {
+		port = c.DatabasePortTest
+	}
+
+	return fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable",
+		c.DatabaseUser,
+		c.DatabasePassword,
+		c.DatabaseHost,
+		port,
+		c.DatabaseName,
+	)
+}
+
+func New() (*Config, error) {
+	cfg, err := env.ParseAs[Config]()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load config: %w", &err)
+	}
+	return &cfg, nil
+}
